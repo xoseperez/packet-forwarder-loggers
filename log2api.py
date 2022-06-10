@@ -17,7 +17,9 @@ BUCKET_COUNT = int(os.environ.get("BUCKET_COUNT", 15))
 buckets = {}
 totals = {
     'rx': 0,
-    'tx': 0
+    'tx': 0,
+    'rx_max': 0,
+    'tx_max': 0,
 }
 previous_bucket = 0
 
@@ -49,10 +51,17 @@ def api_metrics():
     global previous_bucket
     
     manage_buckets(time.time())
-    offset = list(buckets.keys())[0]
+    offset = list(buckets.keys())[-1]
+    tmp = {}
+    totals['rx_max'] = totals['tx_max'] = 0
+    for i in range(BUCKET_COUNT):
+        tmp[i] = buckets.get(offset - BUCKET_COUNT + 1 + i, { 'rx': 0, 'tx': 0 })
+        tmp[i]['offset'] = (i - BUCKET_COUNT) * BUCKET_SIZE
+        totals['rx_max'] = max(totals['rx_max'], tmp[i]['rx'])
+        totals['tx_max'] = max(totals['tx_max'], tmp[i]['tx'])
     return jsonify(dict({
         'totals': totals,
-        'buckets': { (key - offset): value for key, value in buckets.items() },
+        'buckets': tmp,
         'bucket_size': BUCKET_SIZE,
         'bucket_count': BUCKET_COUNT
     }))
@@ -74,3 +83,4 @@ for value in runner.run():
     bucket = manage_buckets(int(value['timestamp']))
     totals[value['type']] = totals[value['type']] + 1
     buckets[bucket][value['type']] = buckets[bucket][value['type']] + 1
+    print(buckets)
