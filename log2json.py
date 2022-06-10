@@ -7,7 +7,7 @@ from legacy import parser as legacy_parser
 
 PROTOCOL  = os.environ.get("PROTOCOL", "basicstation")
 CONTAINER_NAME = os.environ.get("CONTAINER_NAME", "basicstation")
-BUCKET_SIZE = int(os.environ.get("BUCET_SIZE", 60))
+BUCKET_SIZE = int(os.environ.get("BUCKET_SIZE", 60))
 BUCKET_COUNT = int(os.environ.get("BUCKET_COUNT", 15))
 
 buckets = {}
